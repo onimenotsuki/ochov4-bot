@@ -161,13 +161,21 @@ app.post('/webhook', (req, res) => {
                   const flatIntents = intents.map(({ name }) => name);
 
                   if (flatIntents.includes('greetings')) {
-                    fbMessage(sender, `Hola, pregúntame algo.`);
+                    return fbMessage(sender, `Hola, pregúntame algo.`);
                   }
 
                   if (flatIntents.includes('opinion')) {
-                    fbMessage(sender, `Es puto y le gusta la masacuata.`);
+                    return fbMessage(
+                      sender,
+                      `Es puto y le gusta la masacuata.`,
+                    );
                   }
                 }
+
+                return fbMessage(
+                  sender,
+                  'No te entendí, repite tu pregunta, por favor.',
+                );
               })
               .catch((err) => {
                 console.error(

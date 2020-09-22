@@ -4,12 +4,8 @@
   "description": "Chatbot multiplataforma para la tienda en línea de OchoV4",
   "main": "server.js",
   "scripts": {
-    "start": "node app.js",
-    "start:dev": "./node_modules/.bin/nodemon server.js",
-    "test": "jest --config ./jest.config.json",
-    "test:watch": "npm run test -- --watch",
-    "interactive": "node services/wit-ai-interactive",
-    "postinstall": "./node_modules/.bin/patch-package"
+    "start": "node server.js",
+    "start:dev": "./node_modules/.bin/nodemon server.js"
   },
   "author": "Edgar Talledos <onimenotsuki@gmail.com>",
   "license": "UNLICENSED",
