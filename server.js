@@ -4,6 +4,10 @@ const express = require('express');
 const fetch = require('node-fetch');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const request = require('request-promise');
+const querystring = require('querystring');
+const nonce = require('nonce')();
+const cookie = require('cookie');
 
 // Cargamos las variables de entorno
 dotenv.config();
@@ -16,6 +20,11 @@ const WIT_TOKEN = process.env.WIT_TOKEN;
 
 // Messenger API parameters
 const FB_PAGE_TOKEN = process.env.FB_PAGE_TOKEN;
+
+const shApiKey = process.env.SHOPIFY_API_KEY;
+const shApiSecret = process.env.SHOPIFY_API_SECRET;
+const scope = 'read_products';
+const forwardingAddress = process.env.FORWARDING_ADDRESS;
 
 if (!FB_PAGE_TOKEN) {
   throw new Error('missing FB_PAGE_TOKEN');
@@ -95,6 +104,8 @@ const wit = new Wit({
 // Starting our webserver and putting it all together
 const app = express();
 
+app.use(cors());
+
 app.use(({ method, url }, rsp, next) => {
   rsp.on('finish', () => {
     console.log(`${rsp.statusCode} ${method} ${url}`);
@@ -115,6 +126,52 @@ app.get('/webhook', (req, res) => {
   } else {
     res.sendStatus(400);
   }
+});
+
+app.get('/shopify', (req, res) => {
+  const shop = req.query.shop;
+
+  if (shop) {
+    const state = nonce();
+    const redirectUri = `${forwardingAddress}/shopify/callback`;
+    const installUrl = `https://${shop}/admin/oauth/authorize?client_id=${shApiKey}&scope=${scope}&state=${state}&redirect_uri=${redirectUri}`;
+
+    res.cookie('state', state);
+    res.redirect(installUrl);
+  }
+
+  return res
+    .status(400)
+    .send(
+      'Missing shop parameter. Please add ?shop=your-development-shop to your request',
+    );
+});
+
+app.get('/shopify/callback', (req, res) => {
+  const { shop, hmac, code, state } = req.query;
+  const stateCookie = cookie.parse(req.headers.cookie).state;
+
+  if (state !== stateCookie) {
+    return res.status(403).send('Request origin cannot be verified.');
+  }
+
+  if (shop && hmac && code) {
+    const map = { ...req.query };
+    delete map['hmac'];
+    const message = querystring.stringify(map);
+    const generatedHash = crypto
+      .createHmac('sha256', shApiSecret)
+      .update(message)
+      .digest('hex');
+
+    if (generatedHash !== hmac) {
+      return res.status(400).send('HMAC validation failed');
+    }
+
+    return res.status(200).send('HMAC validated');
+  }
+
+  return res.status(400).send('Required parameters missing');
 });
 
 // Message handler
@@ -225,5 +282,4 @@ function verifyRequestSignature(req, res, buf) {
   }
 }
 
-app.listen(PORT);
-console.log('Listening on :' + PORT + '...');
+app.listen(PORT, () => console.log('Listening on :' + PORT + '...'));
