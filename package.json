@@ -13,6 +13,8 @@
     "node": "^12.18.3"
   },
   "dependencies": {
+    "axios": "^0.20.0",
+    "chalk": "^4.1.0",
     "cookie": "^0.4.1",
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
@@ -23,10 +25,12 @@
     "node-wit": "^6.0.0",
     "nonce": "^1.0.4",
     "querystring": "^0.2.0",
+    "redis": "^3.0.2",
     "request": "^2.88.2",
     "request-promise": "^4.2.6"
   },
   "devDependencies": {
+    "babel-eslint": "^10.1.0",
     "eslint": "^7.2.0",
     "eslint-config-airbnb-base": "^14.2.0",
     "eslint-config-prettier": "^6.11.0",
