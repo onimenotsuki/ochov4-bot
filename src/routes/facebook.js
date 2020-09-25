@@ -10,8 +10,10 @@ dotenv.config();
 // Frases de respuesta
 const phrases = require('../training/phrases');
 
-// Variables de configuración
-const fbPageToken = process.env.FB_PAGE_TOKEN;
+// Servicions
+const sendMessage = require('../services/send-message');
+const sendTemplate = require('../services/send-template');
+const setState = require('../services/set-state');
 
 let fbVerifyToken = null;
 
@@ -20,74 +22,6 @@ crypto.randomBytes(8, (err, buff) => {
   fbVerifyToken = buff.toString('hex');
   console.log(`/webhook will accept the Verify Token "${fbVerifyToken}"`);
 });
-
-const fbTemplate = async (id, data) => {
-  const body = JSON.stringify({
-    recipient: { id },
-    message: {
-      attachment: {
-        type: 'template',
-        payload: {
-          template_type: 'generic',
-          elements: data.products.map((product) => ({
-            title: product.title,
-            image_url: product.images[0].src,
-            subtitle: product.title,
-            default_action: {
-              type: 'web_url',
-              url: 'https://ochov4.com/products/nike-zoom-freak-1-oreo',
-              webview_height_ratio: 'tall',
-            },
-            buttons: [
-              {
-                type: 'web_url',
-                url: 'https://ochov4.com/products/nike-zoom-freak-1-oreo',
-                title: 'Verlo en la tienda',
-              },
-            ],
-          })),
-        },
-      },
-    },
-  });
-
-  try {
-    const qs = 'access_token=' + encodeURIComponent(fbPageToken);
-
-    const result = await fetch('https://graph.facebook.com/me/messages?' + qs, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body,
-    });
-    const json = await result.json();
-
-    return json;
-  } catch (error) {
-    throw new Error(JSON.stringify(error));
-  }
-};
-
-const fbMessage = async (id, text) => {
-  const body = JSON.stringify({
-    recipient: { id },
-    message: { text },
-  });
-  const qs = 'access_token=' + encodeURIComponent(fbPageToken);
-
-  try {
-    const result = await fetch('https://graph.facebook.com/me/messages?' + qs, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body,
-    });
-
-    const json = await result.json();
-
-    return json;
-  } catch (error) {
-    throw new Error(JSON.stringify(error));
-  }
-};
 
 router.post('/webhook', (req, res) => {
   // Parse the Messenger payload
@@ -109,71 +43,94 @@ router.post('/webhook', (req, res) => {
           // This is useful if we want our bot to figure out the conversation history
           // const sessionId = findOrCreateSession(sender);
 
+          setState(sender, 'mark_seen');
+
           // We retrieve the message content
           const { text, attachments } = event.message;
 
           if (attachments) {
             // We received an attachment
             // Let's reply with an automatic message
-            fbMessage(
-              sender,
-              'Sorry I can only process text messages for now.',
-            ).catch(console.error);
+            setTimeout(() => {
+              setState(sender);
+            }, 1000);
+
+            setTimeout(() => {
+              sendMessage(
+                sender,
+                'Sorry I can only process text messages for now.',
+              );
+            }, 1000);
           } else if (text) {
             // We received a text message
             // Let's run /message on the text to extract some entities, intents and traits
-            req.wit
-              .message(text)
-              .then(async ({ intents }) => {
-                if (Array.isArray(intents) && intents.length) {
-                  const flatIntents = intents.map(({ name }) => name);
+            setTimeout(() => setState(sender, 'typing_on'), 1000);
 
-                  if (flatIntents.includes('greetings')) {
-                    return fbMessage(
-                      sender,
-                      phrases.greetings[
-                        Math.floor(Math.random() * phrases.greetings.length)
-                      ],
-                    );
-                  }
+            setTimeout(() => {
+              req.wit
+                .message(text)
+                .then(async ({ intents }) => {
+                  if (Array.isArray(intents) && intents.length) {
+                    const flatIntents = intents.map(({ name }) => name);
 
-                  if (flatIntents.includes('get_products')) {
-                    const result = await axios.get(
-                      `${process.env.FORWARDING_ADDRESS}/shopify/products`,
-                      {
-                        params: {
-                          shop: 'ocho-v4-bot.myshopify.com',
-                          limit: 5,
-                          accessToken: process.env.SHOPIFY_ACCESS_TOKEN,
+                    if (flatIntents.includes('greetings')) {
+                      return sendMessage(
+                        sender,
+                        phrases.greetings[
+                          Math.floor(Math.random() * phrases.greetings.length)
+                        ],
+                      );
+                    }
+
+                    if (flatIntents.includes('getProducts')) {
+                      sendMessage(
+                        sender,
+                        phrases.getProducts[
+                          Math.floor(Math.random() * phrases.greetings.length)
+                        ],
+                      );
+
+                      setTimeout(() => setState(sender, 'typing_on'), 1000);
+
+                      const result = await axios.get(
+                        `${process.env.FORWARDING_ADDRESS}/shopify/products`,
+                        {
+                          params: {
+                            shop: 'ocho-v4-bot.myshopify.com',
+                            limit: 5,
+                            accessToken: process.env.SHOPIFY_ACCESS_TOKEN,
+                          },
                         },
-                      },
-                    );
+                      );
 
-                    return fbTemplate(sender, result.data);
+                      setTimeout(() => sendTemplate(sender, result.data), 1000);
+
+                      return;
+                    }
+
+                    return sendMessage(
+                      sender,
+                      'No te entendí, repítelo, por favor.',
+                    );
                   }
 
-                  return fbMessage(
+                  return sendMessage(
                     sender,
-                    'No te entendí, repítelo, por favor. Deep 2',
+                    'No te entendí, repítelo, por favor.',
                   );
-                }
+                })
+                .catch((err) => {
+                  console.error(
+                    '¡Ups! Hay un error con Wit.Ai: ',
+                    err.stack || err,
+                  );
 
-                return fbMessage(
-                  sender,
-                  'No te entendí, repítelo, por favor. Deep 1',
-                );
-              })
-              .catch((err) => {
-                console.error(
-                  'Oops! Got an error from Wit: ',
-                  err.stack || err,
-                );
-
-                return fbMessage(
-                  sender,
-                  'No te entendí, repite tu pregunta, por favor.',
-                );
-              });
+                  return sendMessage(
+                    sender,
+                    'No te entendí, repite tu pregunta, por favor.',
+                  );
+                });
+            }, 1000);
           }
         } else {
           console.log('received event', JSON.stringify(event));
