@@ -97,7 +97,7 @@ router.post('/webhook', (req, res) => {
                         {
                           params: {
                             shop: 'ocho-v4-bot.myshopify.com',
-                            limit: 5,
+                            limit: 6,
                             accessToken: process.env.SHOPIFY_ACCESS_TOKEN,
                           },
                         },
