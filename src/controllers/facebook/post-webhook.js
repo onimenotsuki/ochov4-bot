@@ -11,6 +11,7 @@ const phrases = require('../../training/phrases');
 const sendMessage = require('../../services/send-message');
 const sendTemplate = require('../../services/send-template');
 const setState = require('../../services/set-state');
+const sendQuickReplies = require('../../services/send-quick-replies');
 
 module.exports = (req, res) => {
   // Parse the Messenger payload
@@ -65,6 +66,23 @@ module.exports = (req, res) => {
                         sender,
                         phrases.greetings[
                           Math.floor(Math.random() * phrases.greetings.length)
+                        ],
+                      );
+                    }
+
+                    if (flatIntents.includes('help')) {
+                      return sendQuickReplies(
+                        sender,
+                        'Te aparecerá en tu pantalla todo lo que puedo hacer, solo tienes que seleccionar una opción y te ayudaré con eso.',
+                        [
+                          {
+                            content_type: 'text',
+                            title: 'Conocer nuestros productos',
+                          },
+                          {
+                            content_type: 'text',
+                            title: 'Checar cupones',
+                          },
                         ],
                       );
                     }
