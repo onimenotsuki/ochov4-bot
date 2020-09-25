@@ -8,6 +8,7 @@ const chalk = require('chalk');
 // Cargamos las rutas
 const shopifyRoutes = require('./src/routes/shopify');
 const facebookRoutes = require('./src/routes/facebook');
+const pnlRoutes = require('./src/routes/pnl');
 
 // Cargamos las variables de entorno
 dotenv.config();
@@ -63,6 +64,7 @@ app.use((req, _res, next) => {
 
 // Shopify routes
 app.use('/shopify', shopifyRoutes);
+app.use('/pnl', pnlRoutes);
 
 // Facebook route
 app.use('/', facebookRoutes);
