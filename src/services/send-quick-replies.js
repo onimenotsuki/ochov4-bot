@@ -9,7 +9,7 @@ const fbPageToken = process.env.FB_PAGE_TOKEN;
 module.exports = async (id, text, replies) => {
   const body = JSON.stringify({
     recipient: { id },
-    message: { text, quick_replies: [...replies] },
+    message: { text, quick_replies: replies },
   });
   const qs = 'access_token=' + encodeURIComponent(fbPageToken);
 

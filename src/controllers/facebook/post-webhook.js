@@ -12,6 +12,7 @@ const sendMessage = require('../../services/send-message');
 const sendTemplate = require('../../services/send-template');
 const setState = require('../../services/set-state');
 const sendQuickReplies = require('../../services/send-quick-replies');
+const sendProducts = require('../../services/send-products');
 
 module.exports = (req, res) => {
   // Parse the Messenger payload
@@ -31,10 +32,32 @@ module.exports = (req, res) => {
           // This is useful if we want our bot to figure out the conversation history
           // const sessionId = findOrCreateSession(sender);
 
+          console.log(event);
+
           setState(sender, 'mark_seen');
 
           // We retrieve the message content
-          const { text, attachments } = event.message;
+          const { text, attachments, quick_reply: quickReply } = event.message;
+
+          if (quickReply) {
+            switch (quickReply.payload) {
+              case 'shop:products':
+                return sendProducts(sender);
+              case 'marketing:email': {
+                return sendQuickReplies(
+                  sender,
+                  'Envíame tu correo, por favor.',
+                  [
+                    {
+                      content_type: 'user_email',
+                    },
+                  ],
+                );
+              }
+              default:
+                return sendMessage(sender, '¡Algo raro pasó!');
+            }
+          }
 
           if (attachments) {
             // We received an attachment
@@ -50,7 +73,7 @@ module.exports = (req, res) => {
               );
             }, 1000);
           } else if (text) {
-            // We received a text message
+            // We receivped a text message
             // Let's run /message on the text to extract some entities, intents and traits
             setTimeout(() => setState(sender, 'typing_on'), 1000);
 
@@ -77,11 +100,18 @@ module.exports = (req, res) => {
                         [
                           {
                             content_type: 'text',
-                            title: 'Conocer nuestros productos',
+                            title: 'Todos los productos',
+                            payload: 'shop:products',
                           },
                           {
                             content_type: 'text',
                             title: 'Checar cupones',
+                            payload: 'shop:codes',
+                          },
+                          {
+                            content_type: 'text',
+                            title: 'Enviame promociones',
+                            payload: 'marketing:email',
                           },
                         ],
                       );
