@@ -74,9 +74,7 @@ router.get('/callback', async (req, res) => {
 
       console.log(result.data);
 
-      req.redis.set('shopifyAccessToken', result.data.access_token);
-
-      return res.send('HMAC Validate');
+      return res.send(`access_token: ${result.data.access_token}`);
     } catch (error) {
       console.log(error);
       return res.send('Hubo un error');
@@ -86,8 +84,7 @@ router.get('/callback', async (req, res) => {
   return res.status(400).send('Required parameters missing');
 });
 
-router.get('/products', ({ redis, query }, res) => {
-  const { shop } = query;
+router.get('/products', async ({ query }, res) => {
   let {
     title = '',
     limit = 5,
@@ -97,13 +94,22 @@ router.get('/products', ({ redis, query }, res) => {
     productType,
     fields,
     status,
+    accessToken,
+    shop,
   } = query;
 
-  redis.get('shopifyAccessToken', async (error, accessToken) => {
-    if (error) {
-      return res.status(400).json({ error: JSON.stringify(error) });
-    }
+  if (typeof accessToken === 'undefined' || !accessToken) {
+    return res.status(403).json({
+      error:
+        'Necesitas un access_token de Shopify para realizar la petición, pídelo al administrador',
+    });
+  }
 
+  if (typeof shop === 'undefined' || !shop) {
+    return res.status(400).json({ error: 'El parámetro shop es necesario' });
+  }
+
+  try {
     const { data } = await axios.get(`https://${shop}/admin/products.json`, {
       params: {
         title,
@@ -122,7 +128,9 @@ router.get('/products', ({ redis, query }, res) => {
     });
 
     return res.status(200).json(data);
-  });
+  } catch (error) {
+    return res.status(400).json({ error: JSON.stringify(error) });
+  }
 });
 
 module.exports = router;

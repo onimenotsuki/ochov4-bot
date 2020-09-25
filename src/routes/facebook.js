@@ -7,6 +7,9 @@ const crypto = require('crypto');
 // Cargamos las variables de entorno
 dotenv.config();
 
+// Frases de respuesta
+const phrases = require('../training/phrases');
+
 // Variables de configuración
 const fbPageToken = process.env.FB_PAGE_TOKEN;
 
@@ -126,7 +129,12 @@ router.post('/webhook', (req, res) => {
                   const flatIntents = intents.map(({ name }) => name);
 
                   if (flatIntents.includes('greetings')) {
-                    return fbMessage(sender, `Hola, pregúntame algo.`);
+                    return fbMessage(
+                      sender,
+                      phrases.greetings[
+                        Math.floor(Math.random() * phrases.greetings.length)
+                      ],
+                    );
                   }
 
                   if (flatIntents.includes('get_products')) {
@@ -136,6 +144,7 @@ router.post('/webhook', (req, res) => {
                         params: {
                           shop: 'ocho-v4-bot.myshopify.com',
                           limit: 5,
+                          accessToken: process.env.SHOPIFY_ACCESS_TOKEN,
                         },
                       },
                     );
