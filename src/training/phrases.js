@@ -14,4 +14,8 @@ module.exports = {
     'Hasta pronto. No olvides visitar nuestro sitio web: https://ochov4.com',
     '¡Hasta luego! Espero que te ayuda: https://ochov4.com',
   ],
+  addSubscriber: [
+    '¡Ahora eres parte de #OchoV4Team! Hemos agregado tu correo para que recibas las promociones exclusivas que tenemos para ti.',
+    '¡Perfecto, ahora eres parte de #OchoV4Team! A partir de este momento recibirás las promociones exclusivas que tenemos para ti.',
+  ],
 };

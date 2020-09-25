@@ -13,6 +13,8 @@
     "node": "^12.18.3"
   },
   "dependencies": {
+    "@hubspot/api-client": "^3.0.1",
+    "@mailchimp/mailchimp_marketing": "^3.0.15",
     "axios": "^0.20.0",
     "chalk": "^4.1.0",
     "cookie": "^0.4.1",
@@ -26,7 +28,8 @@
     "nonce": "^1.0.4",
     "querystring": "^0.2.0",
     "request": "^2.88.2",
-    "request-promise": "^4.2.6"
+    "request-promise": "^4.2.6",
+    "validator": "^13.1.17"
   },
   "devDependencies": {
     "babel-eslint": "^10.1.0",

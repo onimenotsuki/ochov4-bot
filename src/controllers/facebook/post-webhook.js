@@ -1,5 +1,6 @@
 const dotenv = require('dotenv');
 const axios = require('axios');
+const validator = require('validator');
 
 // Cargamos las variables de entorno
 dotenv.config();
@@ -13,6 +14,7 @@ const sendTemplate = require('../../services/send-template');
 const setState = require('../../services/set-state');
 const sendQuickReplies = require('../../services/send-quick-replies');
 const sendProducts = require('../../services/send-products');
+const addSubscriber = require('../../services/add-subscriber');
 
 module.exports = (req, res) => {
   // Parse the Messenger payload
@@ -22,7 +24,7 @@ module.exports = (req, res) => {
 
   if (data.object === 'page') {
     data.entry.forEach((entry) => {
-      entry.messaging.forEach((event) => {
+      entry.messaging.forEach(async (event) => {
         if (event.message && !event.message.is_echo) {
           // Yay! We got a new message!
           // We retrieve the Facebook user ID of the sender
@@ -40,23 +42,40 @@ module.exports = (req, res) => {
           const { text, attachments, quick_reply: quickReply } = event.message;
 
           if (quickReply) {
-            switch (quickReply.payload) {
-              case 'shop:products':
-                return sendProducts(sender);
-              case 'marketing:email': {
-                return sendQuickReplies(
-                  sender,
-                  'Envíame tu correo, por favor.',
-                  [
-                    {
-                      content_type: 'user_email',
-                    },
-                  ],
-                );
-              }
-              default:
-                return sendMessage(sender, '¡Algo raro pasó!');
+            if (validator.isEmail(quickReply.payload)) {
+              const response = await addSubscriber({
+                email: quickReply.payload,
+                sender,
+              });
+
+              setState(sender, 'typing_on');
+
+              return setTimeout(() => {
+                sendMessage(sender, response.message);
+              }, 1000);
             }
+
+            if (quickReply.payload === 'shop:products') {
+              return sendProducts(sender);
+            }
+
+            if (quickReply.payload === 'marketing:email') {
+              return sendQuickReplies(sender, 'Envíame tu correo, por favor.', [
+                {
+                  content_type: 'user_email',
+                },
+              ]);
+            }
+          }
+
+          if (validator.isEmail(text)) {
+            const response = await addSubscriber({ email: text, sender });
+
+            setState(sender, 'typing_on');
+
+            return setTimeout(() => {
+              sendMessage(sender, response.message);
+            }, 1000);
           }
 
           if (attachments) {

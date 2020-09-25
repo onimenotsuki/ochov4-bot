@@ -8,6 +8,8 @@ const shopifyRoutes = require('./src/routes/shopify');
 const facebookRoutes = require('./src/routes/facebook');
 const pnlRoutes = require('./src/routes/pnl');
 
+const mailchimp = require('./src/providers/mailchimp');
+
 // Cargamos las variables de entorno
 dotenv.config();
 
@@ -47,6 +49,13 @@ app.use(express.json({ limit: '200kb' }));
 // poder utilizarlo en nuestras peticiones
 app.use((req, _res, next) => {
   req.wit = wit;
+  next();
+});
+
+// Agregamos mailchimp como Middleware para
+// poder utilizarla en nuestras peticiones
+app.use((req, _res, next) => {
+  req.mailchimp = mailchimp;
   next();
 });
 
