@@ -64,10 +64,12 @@ app.use((req, _res, next) => {
 
 // Shopify routes
 app.use('/shopify', shopifyRoutes);
+
+// Wit Ai routes
 app.use('/pnl', pnlRoutes);
 
-// Facebook route
-app.use('/', facebookRoutes);
+// Facebook routes
+app.use('/facebook', facebookRoutes);
 
 redisClient.on('connect', () => {
   console.log('\n');

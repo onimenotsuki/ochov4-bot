@@ -2,12 +2,21 @@ const express = require('express');
 const router = express.Router();
 const dotenv = require('dotenv');
 const axios = require('axios');
+const crypto = require('crypto');
 
 // Cargamos las variables de entorno
 dotenv.config();
 
 // Variables de configuración
 const fbPageToken = process.env.FB_PAGE_TOKEN;
+
+let fbVerifyToken = null;
+
+crypto.randomBytes(8, (err, buff) => {
+  if (err) throw err;
+  fbVerifyToken = buff.toString('hex');
+  console.log(`/webhook will accept the Verify Token "${fbVerifyToken}"`);
+});
 
 const fbTemplate = async (id, data) => {
   const body = JSON.stringify({
@@ -164,6 +173,18 @@ router.post('/webhook', (req, res) => {
     });
   }
   res.sendStatus(200);
+});
+
+// Webhook setup
+router.get('/webhook', (req, res) => {
+  if (
+    req.query['hub.mode'] === 'subscribe' &&
+    req.query['hub.verify_token'] === fbVerifyToken
+  ) {
+    res.send(req.query['hub.challenge']);
+  } else {
+    res.sendStatus(400);
+  }
 });
 
 module.exports = router;
