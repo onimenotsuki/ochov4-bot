@@ -82,7 +82,8 @@ module.exports = (req, res) => {
 
               sms({
                 number: quickReply.payload.replace('+52', ''),
-                message: 'Gracias por suscribirte a #OchoV4Team',
+                message:
+                  'Gracias por suscribirte a #OchoV4Team desde Messenger',
               });
 
               return setTimeout(() => {

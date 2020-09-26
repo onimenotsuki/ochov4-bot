@@ -54,10 +54,6 @@ router.post('/message', async ({ wit, body }, res) => {
         missingPayload.push('number');
       }
 
-      if (missingPayload.lenght === 0) {
-        return res.status(200).json({ message: 'Buscando en Shopify' });
-      }
-
       if (missingPayload.length === 0) {
         let products = [];
         const { data } = await axios.get(
@@ -78,9 +74,9 @@ router.post('/message', async ({ wit, body }, res) => {
           traits,
           missingPayload,
           products,
-          message: `Encontré los siguientes productos para ti: ${products.reduce(
+          message: `Encontre los siguientes productos para ti ${products.reduce(
             (a, b, idx) =>
-              idx === products.length - 1 ? a + ' y ' + b + '.' : a + ', ' + b,
+              idx === products.length - 1 ? a + ' y ' + b : a + ' ' + b,
           )}`,
         });
       }
