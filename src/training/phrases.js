@@ -12,7 +12,7 @@ module.exports = {
   bye: [
     '¡Muchas gracias! Ten un excelente día.',
     'Hasta pronto. No olvides visitar nuestro sitio web: https://ochov4.com',
-    '¡Hasta luego! Espero que te ayuda: https://ochov4.com',
+    '¡Hasta luego! Espero que te haya sido de ayuda. No olvides visitar nuestro sitio web: https://ochov4.com',
   ],
   addSubscriber: [
     '¡Ahora eres parte de #OchoV4Team! Hemos agregado tu correo para que recibas las promociones exclusivas que tenemos para ti.',
