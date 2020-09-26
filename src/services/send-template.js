@@ -3,6 +3,9 @@ const dotenv = require('dotenv');
 // Cargamos las variables de entorno
 dotenv.config();
 
+// Utilidades
+const shuffleArray = require('../utilities/shuffle-array');
+
 // Variables de configuración
 const fbPageToken = process.env.FB_PAGE_TOKEN;
 
@@ -14,7 +17,7 @@ module.exports = async (id, data) => {
         type: 'template',
         payload: {
           template_type: 'generic',
-          elements: data.products.map((product) => ({
+          elements: shuffleArray(data.products).map((product) => ({
             title: product.title,
             image_url:
               product.images[Math.floor(Math.random() * product.images.length)]

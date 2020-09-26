@@ -8,6 +8,9 @@ dotenv.config();
 // Frases de respuesta
 const phrases = require('../../training/phrases');
 
+// Providers
+const sms = require('../../providers/sms');
+
 // Servicios
 const sendMessage = require('../../services/send-message');
 const sendTemplate = require('../../services/send-template');
@@ -43,28 +46,87 @@ module.exports = (req, res) => {
 
           if (quickReply) {
             if (validator.isEmail(quickReply.payload)) {
-              const response = await addSubscriber({
-                email: quickReply.payload,
-                sender,
-              });
+              // const response = await addSubscriber({
+              //   email: quickReply.payload,
+              //   sender,
+              // });
 
               setState(sender, 'typing_on');
 
+              // setTimeout(() => {
+              //   sendMessage(sender, response.message);
+              // }, 1000);
+
               return setTimeout(() => {
-                sendMessage(sender, response.message);
+                sendQuickReplies(
+                  sender,
+                  'Deseas recibir las promociones por SMS?',
+                  [
+                    {
+                      content_type: 'text',
+                      title: 'Si',
+                      payload: 'marketing:sms',
+                    },
+                    {
+                      content_type: 'text',
+                      title: 'No',
+                      payload: 'salutation:bye',
+                    },
+                  ],
+                );
+              }, 1000);
+            }
+
+            if (validator.isMobilePhone(quickReply.payload, 'es-MX')) {
+              setState(sender, 'typing_on');
+
+              sms({
+                number: quickReply.payload.replace('+52', ''),
+                message: 'Gracias por suscribirte a #OchoV4Team',
+              });
+
+              return setTimeout(() => {
+                sendMessage(sender, 'Te envié un SMS para confirmar.');
               }, 1000);
             }
 
             if (quickReply.payload === 'shop:products') {
+              setState(sender, 'typing_on');
+
               return sendProducts(sender);
             }
 
             if (quickReply.payload === 'marketing:email') {
+              setState(sender, 'typing_on');
+
               return sendQuickReplies(sender, 'Envíame tu correo, por favor.', [
                 {
                   content_type: 'user_email',
                 },
               ]);
+            }
+
+            if (quickReply.payload === 'marketing:sms') {
+              setState(sender, 'typing_on');
+
+              return sendQuickReplies(
+                sender,
+                'Envíame tu número de teléfono, por favor.',
+                [
+                  {
+                    content_type: 'user_phone_number',
+                  },
+                ],
+              );
+            }
+
+            if (quickReply.payload === 'salutation:bye') {
+              setState(sender, 'typing_on');
+
+              return sendMessage(
+                sender,
+                phrases.bye[Math.floor(Math.random() * phrases.bye.length)],
+              );
             }
           }
 
