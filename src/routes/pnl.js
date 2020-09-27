@@ -74,9 +74,11 @@ router.post('/message', async ({ wit, body }, res) => {
           traits,
           missingPayload,
           products,
-          message: `Encontré los siguientes productos para ti ¡papirrín!: ${products.reduce(
+          message: `Encontré los siguientes productos para ti  ¡papirrín!: ${products.reduce(
             (a, b, idx) =>
-              idx === products.length - 1 ? a + ' y ' + b + '.' : a + ' . ' + b,
+              idx === products.length - 1
+                ? a + '  y  ' + b + '.'
+                : a + ' . ' + b,
           )}`,
         });
       }
