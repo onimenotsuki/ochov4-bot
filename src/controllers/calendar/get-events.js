@@ -1,21 +1,13 @@
 const { BAD_REQUEST, getStatusText } = require('http-status-codes');
 
-module.exports = async ({ calendar, body }, res) => {
-  const { location, start, end, summary, attendees } = body;
-
+module.exports = async ({ calendar }, res) => {
   try {
-    const newEvent = await calendar.events.insert({
+    const result = await calendar.events.list({
       calendarId: '9t9mv0lcct9l71hfcsr8oo7be0@group.calendar.google.com',
-      requestBody: {
-        location,
-        start,
-        end,
-        summary,
-        attendees,
-      },
+      alwaysIncludeEmail: true,
     });
 
-    return res.status(201).json(newEvent.data);
+    return res.status(200).json(result.data);
   } catch (error) {
     return res.status(BAD_REQUEST).json({
       status: BAD_REQUEST,

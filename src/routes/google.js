@@ -9,4 +9,7 @@ router.get('/calendars/me', calendarController.getMyCalendar);
 // Crea un nuevo evento en el calendario
 router.post('/calendars/me/events', calendarController.createEvent);
 
+// Obtiene todos los eventos de un calendario
+router.get('/calendars/me/events', calendarController.getEvents);
+
 module.exports = router;

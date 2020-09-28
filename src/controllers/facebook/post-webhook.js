@@ -1,6 +1,7 @@
 const dotenv = require('dotenv');
 const axios = require('axios');
 const validator = require('validator');
+const add = require('date-fns/add');
 
 // Cargamos las variables de entorno
 dotenv.config();
@@ -89,6 +90,15 @@ module.exports = (req, res) => {
               return setTimeout(() => {
                 sendMessage(sender, 'Te envié un SMS para confirmar.');
               }, 1000);
+            }
+
+            if (quickReply.payload === 'schedule:reserve') {
+              setState(sender, 'typing_on');
+
+              return sendMessage(
+                sender,
+                'Por favor, escribe el día y la hora de tu cita.',
+              );
             }
 
             if (quickReply.payload === 'shop:products') {
@@ -211,16 +221,6 @@ module.exports = (req, res) => {
                             title: 'Reservar cita',
                             payload: 'schedule:reserve',
                           },
-                          {
-                            content_type: 'text',
-                            title: 'Checar cita',
-                            payload: 'schedule:check',
-                          },
-                          {
-                            content_type: 'text',
-                            title: 'Cambiar cita',
-                            payload: 'schedule:change',
-                          },
                         ],
                       );
                     }
@@ -258,6 +258,57 @@ module.exports = (req, res) => {
                       return setTimeout(
                         () => sendTemplate(sender, result.data.products),
                         1000,
+                      );
+                    }
+
+                    if (flatIntents.includes('schedule')) {
+                      const datetimeSchedule = entities.hasOwnProperty(
+                        'wit$datetime:datetime',
+                      )
+                        ? entities['wit$datetime:datetime'][0]
+                        : { value: '' };
+
+                      if (datetimeSchedule.value) {
+                        console.log(datetimeSchedule.value);
+
+                        const start = new Date(datetimeSchedule.value);
+                        const end = new Date(
+                          add(new Date(datetimeSchedule.value), {
+                            minutes: 20,
+                          }),
+                        );
+
+                        try {
+                          const result = await axios.post(
+                            `${process.env.FORWARDING_ADDRESS}/google/calendars/me/events`,
+                            {
+                              summary: 'Evento creado desde Messenger',
+                              start: {
+                                dateTime: start,
+                                timeZone: 'America/Mexico_City',
+                              },
+                              end: {
+                                dateTime: end,
+                                timeZone: 'America/Mexico_City',
+                              },
+                            },
+                          );
+
+                          return sendMessage(
+                            sender,
+                            `Tu cita ha sido agendada. Puedes visitar el siguiente enlace para confirmar: ${result.data.htmlLink}`,
+                          );
+                        } catch (error) {
+                          return sendMessage(
+                            sender,
+                            'Hubo un error al agendar tu cita, intenta más tarde.',
+                          );
+                        }
+                      }
+
+                      return sendMessage(
+                        sender,
+                        'Por favor, sé más especifíco, no pude agendar la cita correctamente.',
                       );
                     }
 
