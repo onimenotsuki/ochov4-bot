@@ -193,6 +193,13 @@ module.exports = (req, res) => {
                       );
                     }
 
+                    if (flatIntents.includes('askOriginals')) {
+                      return sendMessage(
+                        sender,
+                        'Todos nuestros productos son 100% originales.',
+                      );
+                    }
+
                     if (flatIntents.includes('help')) {
                       return sendQuickReplies(
                         sender,
