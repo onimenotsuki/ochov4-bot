@@ -19,6 +19,9 @@ const facebookRoutes = require('./src/routes/facebook');
 const pnlRoutes = require('./src/routes/pnl');
 const googleRoutes = require('./src/routes/google');
 
+// Documentación
+const swaggerDef = require('./docs/swagger-def');
+
 // Providers
 const mailchimp = require('./src/providers/mailchimp');
 const { calendar } = require('./src/providers/google');
@@ -123,6 +126,18 @@ app.use((req, _, next) => {
 
 // Ping
 app.use(health.ping('/ping'));
+
+app.use(
+  '/docs',
+  (req, _res, next) => {
+    swaggerDef.host = req.get('host');
+    req.swaggerDoc = swaggerDef;
+
+    next();
+  },
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerDef, { explorer: true }),
+);
 
 // Shopify routes
 app.use('/shopify', shopifyRoutes);
