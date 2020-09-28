@@ -95,6 +95,7 @@ router.get('/products', async ({ query }, res) => {
     fields,
     status,
     accessToken,
+    collectionId,
     shop,
   } = query;
 
@@ -113,14 +114,15 @@ router.get('/products', async ({ query }, res) => {
     const { data } = await axios.get(`https://${shop}/admin/products.json`, {
       params: {
         title,
-        published_status: 'published',
         status,
         limit,
-        since_id: sinceId,
         vendor,
         handle,
-        product_type: productType,
         fields,
+        published_status: 'published',
+        product_type: productType,
+        since_id: sinceId,
+        collection_id: collectionId,
       },
       headers: {
         'X-Shopify-Access-Token': accessToken,

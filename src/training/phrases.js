@@ -4,10 +4,19 @@ module.exports = {
     '¡Qué tal! ¿Te puedo ayudar en algo?',
     '¡Hola! ¿Quieres que te ayude con algo?',
   ],
+  compliment: [
+    '¡Muchas gracias, igual tú, eres genial!',
+    '¡Igual tú, eres genial!',
+  ],
   getProducts: [
-    '¡Por supuesto! Estos son los productos que tenemos para ti.',
-    '¡Por supuesto! Estoy seguro que te encantará lo que tengo para ti.',
+    'Estos son los productos que tenemos para ti.',
+    'Estoy seguro que te encantará lo que tengo para ti.',
     '¡Estoy buscando! Te voy a enseñar los últimos modelos que tenemos.',
+  ],
+
+  getProduct: [
+    'Estoy buscando el producto con las características que deseas.',
+    'Permíteme un momento, estoy buscando lo que me has pedido.',
   ],
   bye: [
     '¡Muchas gracias! Ten un excelente día.',

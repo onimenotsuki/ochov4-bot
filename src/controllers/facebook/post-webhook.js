@@ -162,9 +162,27 @@ module.exports = (req, res) => {
             setTimeout(() => {
               req.wit
                 .message(text)
-                .then(async ({ intents }) => {
+                .then(async ({ intents, entities }) => {
                   if (Array.isArray(intents) && intents.length) {
                     const flatIntents = intents.map(({ name }) => name);
+
+                    if (flatIntents.includes('compliment')) {
+                      return sendMessage(
+                        sender,
+                        phrases.compliment[
+                          Math.floor(Math.random() * phrases.compliment.length)
+                        ],
+                      );
+                    }
+
+                    if (flatIntents.includes('greetings')) {
+                      return sendMessage(
+                        sender,
+                        phrases.greetings[
+                          Math.floor(Math.random() * phrases.greetings.length)
+                        ],
+                      );
+                    }
 
                     if (flatIntents.includes('greetings')) {
                       return sendMessage(
@@ -182,13 +200,8 @@ module.exports = (req, res) => {
                         [
                           {
                             content_type: 'text',
-                            title: 'Todos los productos',
+                            title: 'Buscar productos',
                             payload: 'shop:products',
-                          },
-                          {
-                            content_type: 'text',
-                            title: 'Checar cupones',
-                            payload: 'shop:codes',
                           },
                           {
                             content_type: 'text',
@@ -230,9 +243,103 @@ module.exports = (req, res) => {
                       );
 
                       return setTimeout(
-                        () => sendTemplate(sender, result.data),
+                        () => sendTemplate(sender, result.data.products),
                         1000,
                       );
+                    }
+
+                    if (flatIntents.includes('getProduct')) {
+                      let products = [];
+
+                      sendMessage(
+                        sender,
+                        phrases.getProduct[
+                          Math.floor(Math.random() * phrases.getProduct.length)
+                        ],
+                      );
+
+                      const genre = entities.hasOwnProperty('genre:genre')
+                        ? entities['genre:genre'][0]
+                        : { value: '' };
+
+                      const brand = entities.hasOwnProperty('brand:brand')
+                        ? entities['brand:brand'][0]
+                        : { value: '' };
+
+                      const model = entities.hasOwnProperty('model:model')
+                        ? entities['model:model'][0]
+                        : { value: '' };
+
+                      const color = entities.hasOwnProperty('color:color')
+                        ? entities['color:color'][0]
+                        : { value: '' };
+
+                      let collection = '';
+
+                      switch (genre.value) {
+                        case 'mujer':
+                          collection = '222042521763';
+                          break;
+                        case 'hombre':
+                          collection = '222042620067';
+                          break;
+                        default:
+                          collection = '';
+                          break;
+                      }
+
+                      setTimeout(() => setState(sender, 'typing_on'), 1000);
+
+                      const result = await axios.get(
+                        `${process.env.FORWARDING_ADDRESS}/shopify/products`,
+                        {
+                          params: {
+                            shop: 'ocho-v4-bot.myshopify.com',
+                            limit: 6,
+                            accessToken: process.env.SHOPIFY_ACCESS_TOKEN,
+                            vendor: brand.value,
+                            collectionId: collection,
+                          },
+                        },
+                      );
+
+                      products =
+                        color.value !== ''
+                          ? result.data.products.filter(({ tags }) => {
+                              const tagsToArray = tags.split(', ');
+
+                              return (
+                                tagsToArray.includes(color.value) ||
+                                tagsToArray.includes(model.value)
+                              );
+                            })
+                          : result.data.products;
+
+                      if (products.length < 1) {
+                        sendMessage(
+                          sender,
+                          'No encontré ningún modelo con esas características.',
+                        );
+
+                        return sendQuickReplies(
+                          sender,
+                          '¿Deseas que te envíe a tu correo la información cuando nos hayan llegado nuevos modelos?',
+                          [
+                            {
+                              content_type: 'text',
+                              title: 'Si',
+                              payload: 'marketing:email',
+                            },
+                            {
+                              content_type: 'text',
+                              title: 'No',
+                              payload: 'salutation:bye',
+                            },
+                          ],
+                        );
+                      }
+
+                      return sendTemplate(sender, products);
                     }
 
                     return sendMessage(
