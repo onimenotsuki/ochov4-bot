@@ -7,8 +7,11 @@ const dotenv = require('dotenv');
 const shopifyRoutes = require('./src/routes/shopify');
 const facebookRoutes = require('./src/routes/facebook');
 const pnlRoutes = require('./src/routes/pnl');
+const googleRoutes = require('./src/routes/google');
 
+// Providers
 const mailchimp = require('./src/providers/mailchimp');
+const { calendar } = require('./src/providers/google');
 
 // Cargamos las variables de entorno
 dotenv.config();
@@ -59,8 +62,19 @@ app.use((req, _res, next) => {
   next();
 });
 
+// // Metemos en la solicitud a Google Calendar API
+// // como Middlewares
+app.use((req, _, next) => {
+  req.calendar = calendar;
+
+  next();
+});
+
 // Shopify routes
 app.use('/shopify', shopifyRoutes);
+
+// Google routes
+app.use('/google', googleRoutes);
 
 // Wit Ai routes
 app.use('/pnl', pnlRoutes);

@@ -206,6 +206,21 @@ module.exports = (req, res) => {
                             title: 'Enviame promociones',
                             payload: 'marketing:email',
                           },
+                          {
+                            content_type: 'text',
+                            title: 'Reservar cita',
+                            payload: 'schedule:reserve',
+                          },
+                          {
+                            content_type: 'text',
+                            title: 'Checar cita',
+                            payload: 'schedule:check',
+                          },
+                          {
+                            content_type: 'text',
+                            title: 'Cambiar cita',
+                            payload: 'schedule:change',
+                          },
                         ],
                       );
                     }
