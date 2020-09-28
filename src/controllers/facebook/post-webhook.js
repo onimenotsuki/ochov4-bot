@@ -184,19 +184,10 @@ module.exports = (req, res) => {
                       );
                     }
 
-                    if (flatIntents.includes('greetings')) {
-                      return sendMessage(
-                        sender,
-                        phrases.greetings[
-                          Math.floor(Math.random() * phrases.greetings.length)
-                        ],
-                      );
-                    }
-
                     if (flatIntents.includes('askOriginals')) {
                       return sendMessage(
                         sender,
-                        'Todos nuestros productos son 100% originales.',
+                        'Todos nuestros productos son 100% originales. Visita nuestro sitio web: https://ochov4.com para obtener más información.',
                       );
                     }
 
