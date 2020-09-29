@@ -52,31 +52,11 @@ const wit = new Wit({
 // Starting our webserver and putting it all together
 const app = express();
 
-// Logger
-app.use(
-  expressWinston.logger({
-    transports: [new winston.transports.Console()],
-    format: winston.format.combine(
-      winston.format.colorize(),
-      winston.format.json(),
-      winston.format.simple(),
-    ),
-    meta: true, // optional: control whether you want to log the meta data about the request (default to true)
-    msg: `${separator}HTTP:::{{req.method}} {{req.url}}${separator}`,
-    colorize: true,
-    ignoreRoute: () => {
-      return false;
-    },
-  }),
-);
-
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
 // Protección de cabeceras
 app.use(helmet());
-
-// Ping
-app.use(health.ping('/api/v1/ping'));
 
 // CORS
 app.use(cors());
@@ -99,9 +79,6 @@ app.use(({ method, url }, rsp, next) => {
   next();
 });
 
-app.use(express.urlencoded({ extended: false }));
-app.use(express.json({ limit: '200kb' }));
-
 // Agregamos wit como Middleware para
 // poder utilizarlo en nuestras peticiones
 app.use((req, _res, next) => {
@@ -120,7 +97,6 @@ app.use((req, _res, next) => {
 // // como Middlewares
 app.use((req, _, next) => {
   req.calendar = calendar;
-
   next();
 });
 
@@ -151,31 +127,32 @@ app.use('/pnl', pnlRoutes);
 // Facebook routes
 app.use('/facebook', facebookRoutes);
 
-// Configuración de la base de datos
-mongoose.set('useCreateIndex', true);
-mongoose.set('useNewUrlParser', true);
-mongoose.set('useFindAndModify', false);
+// // Configuración de la base de datos
+// mongoose.set('useCreateIndex', true);
+// mongoose.set('useNewUrlParser', true);
+// mongoose.set('useFindAndModify', false);
 
-// Nos conectamos a las base de datos en mongo
-mongoose.connect(
-  process.env.NODE_ENV === 'development'
-    ? process.env.MONGO_DB_URI_DEV
-    : process.env.MONGO_DB_URI,
-  {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  },
-);
+// // Nos conectamos a las base de datos en mongo
+// mongoose.connect(
+//   process.env.NODE_ENV === 'development'
+//     ? process.env.MONGO_DB_URI_DEV
+//     : process.env.MONGO_DB_URI,
+//   {
+//     useNewUrlParser: true,
+//     useUnifiedTopology: true,
+//   },
+// );
 
-mongoose.connection.on('error', (err) =>
-  console.log(chalk.red('MONGODB::ERROR::'), chalk.red(err)),
-);
+// mongoose.connection.on('error', (err) =>
+//   console.log(chalk.red('MONGODB::ERROR::'), chalk.red(err)),
+// );
 
-mongoose.connection.on('connected', () => {
-  console.log('\n');
-  console.log(chalk.blue('==================== MONGO ===================='));
-  console.log(chalk.blue('MONGO::CONNECT::Conexión hecha con éxito'));
-  console.log(chalk.blue('==================== MONGO ===================='));
-});
+// mongoose.connection.on('connected', () => {
+//   console.log('\n');
+//   console.log(chalk.blue('==================== MONGO ===================='));
+//   console.log(chalk.blue('MONGO::CONNECT::Conexión hecha con éxito'));
+//   console.log(chalk.blue('==================== MONGO ===================='));
+//   console.log('\n');
+// });
 
 app.listen(PORT, () => console.log('Listening on :' + PORT + '...'));

@@ -234,6 +234,13 @@ module.exports = (req, res) => {
                       );
                     }
 
+                    if (flatIntents.includes('getSchedule')) {
+                      return sendMessage(
+                        sender,
+                        'Por supuesto, yo te ayudo. Solo escribe el día y la hora en que quieres hacer tu reservación.',
+                      );
+                    }
+
                     if (flatIntents.includes('getProducts')) {
                       sendMessage(
                         sender,
