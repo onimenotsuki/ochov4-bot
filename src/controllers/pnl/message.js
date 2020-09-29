@@ -39,6 +39,7 @@ module.exports = async ({ wit, body }, res) => {
 
     if (flatIntents.includes('getProduct')) {
       const missingPayload = [];
+      let products = [];
 
       if (
         Object.keys(entities).filter((el) => el.includes('color')).length === 0
@@ -82,8 +83,6 @@ module.exports = async ({ wit, body }, res) => {
             collection = '';
             break;
         }
-
-        let products = [];
 
         const { data } = await axios.get(
           `${process.env.FORWARDING_ADDRESS}/shopify/products`,
