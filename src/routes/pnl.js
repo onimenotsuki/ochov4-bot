@@ -6,5 +6,6 @@ const pnlController = require('../controllers/pnl');
 
 router.post('/message', pnlController.message);
 router.post('/raw', pnlController.raw);
+router.post('/get-index', pnlController.getIndex);
 
 module.exports = router;
