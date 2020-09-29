@@ -1,16 +1,10 @@
 const { Wit, log } = require('node-wit');
 const express = require('express');
-const winston = require('winston');
-const chalk = require('chalk');
-const expressWinston = require('express-winston');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const health = require('express-ping');
-const mongoSanitize = require('express-mongo-sanitize');
-const mongoose = require('mongoose');
 const xss = require('xss-clean');
 const cors = require('cors');
-const swaggerUi = require('swagger-ui-express');
 const dotenv = require('dotenv');
 
 // Cargamos las rutas
@@ -19,15 +13,9 @@ const facebookRoutes = require('./src/routes/facebook');
 const pnlRoutes = require('./src/routes/pnl');
 const googleRoutes = require('./src/routes/google');
 
-// Documentación
-const swaggerDef = require('./docs/swagger-def');
-
 // Providers
 const mailchimp = require('./src/providers/mailchimp');
 const { calendar } = require('./src/providers/google');
-
-// Definimos un separador para el logger
-const separator = '\n========================\n';
 
 // Cargamos las variables de entorno
 dotenv.config();
@@ -103,18 +91,6 @@ app.use((req, _, next) => {
 // Ping
 app.use(health.ping('/ping'));
 
-app.use(
-  '/docs',
-  (req, _res, next) => {
-    swaggerDef.host = req.get('host');
-    req.swaggerDoc = swaggerDef;
-
-    next();
-  },
-  swaggerUi.serve,
-  swaggerUi.setup(swaggerDef, { explorer: true }),
-);
-
 // Shopify routes
 app.use('/shopify', shopifyRoutes);
 
@@ -126,33 +102,5 @@ app.use('/pnl', pnlRoutes);
 
 // Facebook routes
 app.use('/facebook', facebookRoutes);
-
-// // Configuración de la base de datos
-// mongoose.set('useCreateIndex', true);
-// mongoose.set('useNewUrlParser', true);
-// mongoose.set('useFindAndModify', false);
-
-// // Nos conectamos a las base de datos en mongo
-// mongoose.connect(
-//   process.env.NODE_ENV === 'development'
-//     ? process.env.MONGO_DB_URI_DEV
-//     : process.env.MONGO_DB_URI,
-//   {
-//     useNewUrlParser: true,
-//     useUnifiedTopology: true,
-//   },
-// );
-
-// mongoose.connection.on('error', (err) =>
-//   console.log(chalk.red('MONGODB::ERROR::'), chalk.red(err)),
-// );
-
-// mongoose.connection.on('connected', () => {
-//   console.log('\n');
-//   console.log(chalk.blue('==================== MONGO ===================='));
-//   console.log(chalk.blue('MONGO::CONNECT::Conexión hecha con éxito'));
-//   console.log(chalk.blue('==================== MONGO ===================='));
-//   console.log('\n');
-// });
 
 app.listen(PORT, () => console.log('Listening on :' + PORT + '...'));
