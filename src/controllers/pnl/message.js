@@ -52,6 +52,28 @@ module.exports = async ({ wit, body }, res) => {
         missingPayload.push('number');
       }
 
+      const genre = entities.hasOwnProperty('genre:genre')
+        ? entities['genre:genre'][0]
+        : { value: '' };
+
+      const color = entities.hasOwnProperty('color:color')
+        ? entities['color:color'][0]
+        : { value: '' };
+
+      let collection = '';
+
+      switch (genre.value) {
+        case 'mujer':
+          collection = '222042521763';
+          break;
+        case 'hombre':
+          collection = '222042620067';
+          break;
+        default:
+          collection = '';
+          break;
+      }
+
       if (missingPayload.length === 0) {
         let products = [];
         const { data } = await axios.get(
@@ -59,13 +81,18 @@ module.exports = async ({ wit, body }, res) => {
           {
             params: {
               shop: 'ocho-v4-bot.myshopify.com',
-              limit: 6,
+              limit: 50,
               accessToken: process.env.SHOPIFY_ACCESS_TOKEN,
+              collectionId: collection,
             },
           },
         );
 
-        products = shuffleArray(data.products.map(({ title }) => title)).filter(
+        productsObj = data.products
+          .map(({ title, tags, id }) => ({ title, tags, id }))
+          .filter(({ tags }) => tags.includes(color.value));
+
+        products = shuffleArray(productsObj.map(({ title }) => title)).filter(
           (_, idx) => idx <= 3,
         );
 
@@ -74,12 +101,17 @@ module.exports = async ({ wit, body }, res) => {
           traits,
           missingPayload,
           products,
-          message: `Encontré los siguientes productos para ti  ¡papirrín!: ${products.reduce(
-            (a, b, idx) =>
-              idx === products.length - 1
-                ? a + '  y  ' + b + '.'
-                : a + ' . ' + b,
-          )}`,
+          productsObj,
+          success: Boolean(products.length),
+          message:
+            products.length < 1
+              ? 'Lo siento, no encontré ningún producto con las características que deseas'
+              : `Encontré los siguientes productos para ti: ${products.reduce(
+                  (a, b, idx) =>
+                    idx === products.length - 1
+                      ? a + '  y  ' + b + '.'
+                      : a + ' . ' + b,
+                )}`,
         });
       }
 
