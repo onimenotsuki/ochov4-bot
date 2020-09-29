@@ -57,7 +57,6 @@ app.use(
 );
 
 // Un poco de seguridad
-app.use(mongoSanitize());
 app.use(xss());
 
 app.use(({ method, url }, rsp, next) => {
