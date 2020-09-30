@@ -6,6 +6,7 @@ dotenv.config();
 
 // Providers
 const sms = require('../../providers/sms');
+const shortUrl = require('../../providers/short-url');
 
 module.exports = async ({ body }, res) => {
   const { phoneNumber, index } = body;
@@ -36,15 +37,18 @@ module.exports = async ({ body }, res) => {
       },
     );
 
-    sms({
-      number: phoneNumber,
-      message: `Se generó la orden: ${order.draft_order.id}. Puedes pasar a la tienda a hacer el pago: ochov4.com`,
-    });
+    // const shortedUrl = shortUrl(order.draft_order.invoice_url);
+
+    // sms({
+    //   number: phoneNumber,
+    //   message: `Se generó la orden: ${order.draft_order.id}, accede al enlace para terminar`,
+    // });
 
     return res.status(200).json({
       message: 'Mensaje enviado correctamente',
       phoneNumber,
       order,
+      shortedUrl,
     });
   } catch (error) {
     return res.status(200).json({
