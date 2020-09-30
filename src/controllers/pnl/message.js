@@ -91,9 +91,9 @@ module.exports = async ({ wit, body }, res) => {
           .map(({ title, tags, id }) => ({ title, tags, id }))
           .filter(({ tags }) => tags.includes(color.value));
 
-        products = shuffleArray(productsObj.map(({ title }) => title)).filter(
-          (_, idx) => idx <= 3,
-        );
+        products = productsObj
+          .map(({ title }) => title)
+          .filter((_, idx) => idx <= 3);
 
         return res.status(200).json({
           intent: 'getProduct',

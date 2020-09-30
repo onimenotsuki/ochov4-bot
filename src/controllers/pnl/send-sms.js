@@ -13,11 +13,11 @@ module.exports = async ({ body }, res) => {
   const selectItem = (number) => {
     switch (number) {
       case 0:
-        return 36353320943779;
+        return '36353320943779';
       case 1:
-        return 36392326201507;
+        return '36392326201507';
       case 2:
-        return 36441062211747;
+        return '36441062211747';
     }
   };
 
@@ -37,6 +37,7 @@ module.exports = async ({ body }, res) => {
     return res.status(200).json({
       message: 'Mensaje enviado correctamente',
       phoneNumber,
+      order,
     });
   } catch (error) {
     return res.status(200).json({
