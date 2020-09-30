@@ -7,7 +7,7 @@ dotenv.config();
 module.exports = async ({ query }, res) => {
   let {
     title = '',
-    limit = 5,
+    limit = 20,
     sinceId,
     vendor,
     handle,
