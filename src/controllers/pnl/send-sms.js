@@ -4,7 +4,7 @@ const axios = require('axios');
 const sms = require('../../providers/sms');
 
 module.exports = async ({ body }, res) => {
-  const { phoneNumber, productId } = body;
+  const { phoneNumber, productId = '5708147163299' } = body;
 
   const {
     data: product,
