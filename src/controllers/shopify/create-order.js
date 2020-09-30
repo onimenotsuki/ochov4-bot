@@ -17,10 +17,6 @@ module.exports = async ({ body, query }, res) => {
       `https://${shop}/admin/draft_orders.json`,
       {
         draft_order: {
-          customer: {
-            id: 4160038666403,
-          },
-          use_customer_default_address: true,
           line_items: [
             {
               variant_id: item,
