@@ -4,31 +4,14 @@ const dotenv = require('dotenv');
 // Cargamos las variables de entorno
 dotenv.config();
 
-module.exports = async ({ body, query }, res) => {
-  const { shop } = query;
-  const { item } = body;
-
+module.exports = async ({ params: { id }, query: { shop } }, res) => {
   if (typeof shop === 'undefined' || !shop) {
     return res.status(400).json({ error: 'El parámetro shop es necesario' });
   }
 
   try {
-    const { data } = await axios.post(
-      `https://${shop}/admin/draft_orders.json`,
-      {
-        draft_order: {
-          customer: {
-            id: 4160038666403,
-          },
-          use_customer_default_address: true,
-          line_items: [
-            {
-              variant_id: item,
-              quantity: 1,
-            },
-          ],
-        },
-      },
+    const { data } = await axios.get(
+      `https://${shop}/admin/products/${id}.json`,
       {
         headers: {
           'X-Shopify-Access-Token': process.env.SHOPIFY_ACCESS_TOKEN,

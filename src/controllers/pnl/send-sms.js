@@ -1,14 +1,28 @@
+const axios = require('axios');
+
 // Providers
 const sms = require('../../providers/sms');
 
-module.exports = ({ body }, res) => {
+module.exports = async ({ body }, res) => {
   const { phoneNumber, productId } = body;
 
-  console.log(productId);
+  const {
+    data: product,
+  } = await axios.get(
+    `${process.env.FORWARDING_ADDRESS}/shopify/products/${productId}`,
+    { params: { shop: 'ocho-v4-bot.myshopify.com' } },
+  );
+
+  const { data: order } = await axios.post(
+    `${process.env.FORWARDING_ADDRESS}/shopify/create-order`,
+    {
+      item: product.variants[0].id,
+    },
+  );
 
   sms({
     number: phoneNumber,
-    message: 'Gracias por suscribirte a #OchoV4Team desde Messenger',
+    message: order.invoice_url,
   });
 
   return res

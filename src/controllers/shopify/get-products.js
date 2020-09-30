@@ -1,4 +1,8 @@
 const axios = require('axios');
+const dotenv = require('dotenv');
+
+// Cargamos las variables de entorno
+dotenv.config();
 
 module.exports = async ({ query }, res) => {
   let {
@@ -10,17 +14,9 @@ module.exports = async ({ query }, res) => {
     productType,
     fields,
     status,
-    accessToken,
     collectionId,
     shop,
   } = query;
-
-  if (typeof accessToken === 'undefined' || !accessToken) {
-    return res.status(403).json({
-      error:
-        'Necesitas un access_token de Shopify para realizar la petición, pídelo al administrador',
-    });
-  }
 
   if (typeof shop === 'undefined' || !shop) {
     return res.status(400).json({ error: 'El parámetro shop es necesario' });
@@ -41,7 +37,7 @@ module.exports = async ({ query }, res) => {
         collection_id: collectionId,
       },
       headers: {
-        'X-Shopify-Access-Token': accessToken,
+        'X-Shopify-Access-Token': process.env.SHOPIFY_ACCESS_TOKEN,
       },
     });
 

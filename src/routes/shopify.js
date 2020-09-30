@@ -16,7 +16,8 @@ const shopifyController = require('../controllers/shopify');
 // Variables de configuración
 const shApiKey = process.env.SHOPIFY_API_KEY;
 const shApiSecret = process.env.SHOPIFY_API_SECRET;
-const scope = 'read_products';
+const scope =
+  'read_products,read_customers,read_draft_orders,write_draft_orders,write_orders,read_orders';
 const forwardingAddress = process.env.FORWARDING_ADDRESS;
 
 router.get('/', (req, res) => {
@@ -88,5 +89,7 @@ router.get('/callback', async (req, res) => {
 });
 
 router.get('/products', shopifyController.getProducts);
+router.get('/products/:id', shopifyController.getProduct);
+router.post('/create-order', shopifyController.createOrder);
 
 module.exports = router;

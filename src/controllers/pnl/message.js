@@ -82,7 +82,6 @@ module.exports = async ({ wit, body }, res) => {
             params: {
               shop: 'ocho-v4-bot.myshopify.com',
               limit: 50,
-              accessToken: process.env.SHOPIFY_ACCESS_TOKEN,
               collectionId: collection,
             },
           },
