@@ -18,6 +18,8 @@ module.exports = async ({ body }, res) => {
         return '36392326201507';
       case 2:
         return '36441062211747';
+      default:
+        return '36441062211747';
     }
   };
 
@@ -27,11 +29,16 @@ module.exports = async ({ body }, res) => {
       {
         item: selectItem(parseInt(index, 10)),
       },
+      {
+        params: {
+          shop: 'ocho-v4-bot.myshopify.com',
+        },
+      },
     );
 
     sms({
       number: phoneNumber,
-      message: order.invoice_url,
+      message: `Se generó la orden: ${order.draft_order.id}. Puedes pasar a la tienda a hacer el pago: ochov4.com`,
     });
 
     return res.status(200).json({
